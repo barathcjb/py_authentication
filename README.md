@@ -1,2 +1,1 @@
-# password-handler
-simplified password handler library for python
+password handler library for python
