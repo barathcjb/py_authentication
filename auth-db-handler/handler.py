@@ -101,8 +101,8 @@ class Client:
 if __name__ == "__main__":
     c = Client(auth_file_location=os.path.dirname(__file__))
     c.addUsername(username="Barathwaj02", hash_it=False)
-    c.addPassword(password='Sholmes02-', hashAlgo='md5')
+    c.addPassword(password='Sholmes02-', hashAlgo='sha512')
     c.addRemarks(remarks="hello world")
     c.logCredents()
     c.viewAuthDb()
-    #print(c.validate(username="Sholmes", password=""))
+    print(c.validate(username="Barathwaj02", password="Sholmes02-"))

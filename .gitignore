@@ -106,3 +106,4 @@ venv.bak/
 #vscode
 .vscode
 .vscode/settings.json
+auth-db-handler/authDb

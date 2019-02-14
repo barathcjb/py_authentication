@@ -100,6 +100,6 @@ class Validator:
     @property
     def validation(self):
         if self.__username == self.__fp__username and getattr(hashlib, self.__algo)(
-                self.__password.encode('utf-8')).hexdigest() == self._fp_password:
+                self.__password.encode('utf-8')).hexdigest() == self.__fp_password:
             return True
         return False
