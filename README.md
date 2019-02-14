@@ -1,1 +1,1 @@
-password handler library for python
+user authentication handler library for python. Uses password hashing and user data storage for user input authentication paramerters with user data validation API.
