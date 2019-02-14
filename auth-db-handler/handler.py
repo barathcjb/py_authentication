@@ -3,7 +3,6 @@
 __author__ = 'Barathwaj C'
 __email__ = 'barathcjb@gmail.com'
 
-import gnupg
 import os
 import pickle
 
@@ -15,94 +14,95 @@ __all__ = ['Client', 'Username', 'Password']
 
 class Client:
     def __init__(self, auth_file_location):
-        self._hashAlgo = None  # type: str
-        self._hash_value = None  # type:int
+        self.__hashAlgo = None  # type: str
+        self.__hash_value = None  # type:int
         self._remarks = ''
 
         if os.path.isdir(auth_file_location):
-            self._file_location = auth_file_location
+            self.__file_location = auth_file_location
         else:
             raise Exception("invalid file location")
 
-        self._connection = None
-        self._cursor = None
-        self._loader = None
+        self.__connection = None
+        self.__cursor = None
+        self.__loader = None
 
     @property
-    def hash_value(self):
+    def __hash_algo_value(self):
         for _obj in constants.algos:
-            if _obj.name == self._hashAlgo.upper():
-                self._hash_value = _obj.value
+            if _obj.name == self.__hashAlgo.upper():
+                self.__hash_value = _obj.value
                 break
 
-        return self._hash_value
+        return self.__hash_value
 
-    def _openConnection(self, mode):
+    def __openConnection(self, mode):
         if mode == 'w':
-            self._connection = open(os.path.join(
-                self._file_location, 'authDb'), 'ab')
+            self.__connection = open(os.path.join(
+                self.__file_location, 'authDb'), 'ab')
         if mode == 'r':
-            self._connection = open(os.path.join(
-                self._file_location, 'authDb'), 'rb')
+            self.__connection = open(os.path.join(
+                self.__file_location, 'authDb'), 'rb')
 
-    def _closeConnection(self):
-        self._connection.close()
+    def __closeConnection(self):
+        self.__connection.close()
 
-    def addUsername(self, username, hash_it=False):
-        self._username_obj = helper.Username(hash_it)
-        self._username_obj.set_username(username=username)
+    def addUsername(self, username, hash_it=False, hash_algo='md5'):
+        self.__username_obj = helper.Username(hash_it)
+        self.__username_obj.set_username(username=username)
 
     def addPassword(self, password='', length=(0, 32), separator='_',
                     hashAlgo='md5', uppercase=True, specialchars=True, numbers=True, ignore=''):
-        self._hashAlgo = hashAlgo
-        self._password_obj = helper.Password(password=password, length=length, separator=separator,
-                                             hashAlgo=hashAlgo, uppercase=uppercase, specialchars=specialchars,
-                                             numbers=numbers, ignore=ignore)
+        self.__hashAlgo = hashAlgo
+        self.__password_obj = helper.Password(password=password, length=length, separator=separator,
+                                              hashAlgo=hashAlgo, uppercase=uppercase, specialchars=specialchars,
+                                              numbers=numbers, ignore=ignore)
 
     def addRemarks(self, remarks):
         self._remarks = remarks
 
     def logCredents(self):
-        self._openConnection(mode='w')
-        self._cursor = pickle.Pickler(self._connection)
-        print(self._username_obj.username)
-        print(self._password_obj._hash_password)
-        self._cursor.dump([self._username_obj.username,self._password_obj._hash_password, self._remarks, self.hash_value])
-        self._closeConnection()
+        self.__openConnection(mode='w')
+        self.__cursor = pickle.Pickler(self.__connection)
+        self.__cursor.dump({"username": self.__username_obj.username,
+                            "password": self.__password_obj._hash_password,
+                            "remarks": self._remarks,
+                            "algovalue": self.__hash_algo_value})
+        self.__closeConnection()
 
     def viewAuthDb(self):
-        self._openConnection(mode='r')
-        self._loader = pickle.Unpickler(self._connection)
+        self.__openConnection(mode='r')
+        self.__loader = pickle.Unpickler(self.__connection)
         while True:
             try:
-                print(self._loader.load())
+                print(self.__loader.load())
             except EOFError:
                 break
-        self._closeConnection()
+        self.__closeConnection()
 
     def validate(self, username, password, algo='md5'):
-        self._openConnection(mode='r')
-        self._loader = pickle.Unpickler(self._connection)
-        validation = False
+        self.__openConnection(mode='r')
+        self.__loader = pickle.Unpickler(self.__connection)
+        __validation = False
         while True:
             try:
-                _credents = self._loader.load()
-                validator = helper.Validator(
+                _credents = self.__loader.load()
+                __validator = helper.Validator(
                     username, password, algo, _credents)
-                if validator.validation:
+                if __validator.validation:
                     return True
                     break
             except EOFError:
                 return False
                 break
-        self._closeConnection()
+        self.__closeConnection()
 
 
 if __name__ == "__main__":
     c = Client(auth_file_location=os.path.dirname(__file__))
-    c.addUsername(username="Barathwaj", hash_it=False)
-    c.addPassword(hashAlgo='md5')
+    c.addUsername(username="Barathwaj02", hash_it=False)
+    c.addPassword(password='Sholmes02-', hashAlgo='md5')
     c.addRemarks(remarks="hello world")
     c.logCredents()
     c.viewAuthDb()
-    print(c.validate(username="Sholmes", password=""))
+    #print(c.validate(username="Sholmes", password=""))

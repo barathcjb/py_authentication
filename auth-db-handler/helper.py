@@ -12,93 +12,94 @@ __all__ = ['Username', 'Password']
 
 
 class Username:
-    def __init__(self,hash_it):
-        self._username = None
-        self.is_hash = hash_it
+    def __init__(self, hash_it, hashAlgo='md5'):
+        self.__username = None
+        self.__is_hash = hash_it
+        self.__hashAlgo = hashAlgo
+        self.__hashed_username = None
 
-    def set_username(self, username, hashAlgo='md5'):
-        self._username = username
-        self._hashAlgo = hashAlgo
-        self._hashed_username = self._username
+    def set_username(self, username):
+        self.__username = username
+        self.__hashed_username = self.__username
 
     @property
     def username(self):
-        if self.is_hash:
-            self._hashed_username = getattr(hashlib, self._hashAlgo)(
-                self._username.encode('utf-8')).hexdigest()
-        return self._hashed_username
+        if self.__is_hash:
+            self.__hashed_username = getattr(hashlib, self.__hashAlgo)(
+                self.__username.encode('utf-8')).hexdigest()
+        return self.__hashed_username
 
 
 class Password:
     def __init__(self, password='', length=(0, 32), separator='_',
                  hashAlgo='md5', uppercase=False, specialchars=True, numbers=True, ignore=''):
-        self._minimum_chars = length[0]
-        self._maximum_chars = length[1]
-        self._separator = separator
-        self._special_chars = specialchars
-        self._hash = hashAlgo
-        self._uppercase = uppercase
-        self._number = numbers
-        self._ignore_list = ignore.split(',')
-        self._password = self._build_password(password)
-        self._hash_value = self.determineAlgo
+        self.__minimum_chars = length[0]
+        self.__maximum_chars = length[1]
+        self.__separator = separator
+        self.__special_chars = specialchars
+        self.__hash = hashAlgo
+        self.__uppercase = uppercase
+        self.__number = numbers
+        self.__ignore_list = ignore.split(',')
+        self.__password = self.__build_password(password)
+        self.__hash_value = self.__determineAlgo
 
     @property
     def _hash_password(self):
-        # if self._hash in list(hashlib.algorithms_available):
-        self._hashed_password = getattr(hashlib, self._hash)(
-            self._password.encode('utf-8')).hexdigest()
+        # if self.__hash in list(hashlib.algorithms_available):
+        self._hashed_password = getattr(hashlib, self.__hash)(
+            self.__password.encode('utf-8')).hexdigest()
         # else:
         #     raise exceptions.algoNotFountException()
         return self._hashed_password
 
     @property
-    def determineAlgo(self):
+    def __determineAlgo(self):
         for _obj in constants.algos:
-            if _obj.name == self._hash.upper():
-                _hash_value = _obj.value
+            if _obj.name == self.__hash.upper():
+                __hash_value = _obj.value
                 break
-                return _hash_value
+                return __hash_value
 
-    def _build_password(self, password: str):
+    def __build_password(self, password: str):
         if password == '':
-            _chars = string.ascii_lowercase
-            if self._uppercase:
-                _chars += string.ascii_uppercase
-            if self._special_chars:
-                _chars += string.punctuation
-            if self._number:
-                _chars += string.digits
+            __chars = string.ascii_lowercase
+            if self.__uppercase:
+                __chars += string.ascii_uppercase
+            if self.__special_chars:
+                __chars += string.punctuation
+            if self.__number:
+                __chars += string.digits
 
-            for ignore_key in _chars:
-                if ignore_key in self._ignore_list:
-                    _chars.replace(ignore_key, '')
+            for ignore_key in __chars:
+                if ignore_key in self.__ignore_list:
+                    __chars.replace(ignore_key, '')
 
-            _chars = '{message:{fill}{align}{width}}'.format(
-                message=_chars,
+            __chars = '{message:{fill}{align}{width}}'.format(
+                message=__chars,
                 fill='0',
                 align='>',
-                width=self._maximum_chars,
+                width=self.__maximum_chars,
             )
 
-            return ''.join([random.choice(_chars)for i in range(
-                self._minimum_chars, self._maximum_chars)])
+            return ''.join([random.choice(__chars)for i in range(
+                self.__minimum_chars, self.__maximum_chars)])
         else:
             return password
 
 
 class Validator:
     def __init__(self, username, password, algo, credents):
-        self._username = username
-        self._password = password
-        self._algo = algo
-        self._fp_username = credents[0]
-        self._fp_password = credents[1]
-        self._fp_algo = credents[3]
+        self.__username = username
+        self.__password = password
+        self.__algo = algo
+        self.__fp__username = credents['username']
+        self.__fp_password = credents['password']
+        self.__fp_algo = credents['algovalue']
 
     @property
     def validation(self):
-        if self._username == self._fp_username and getattr(hashlib, self._algo)(
-                self._password.encode('utf-8')).hexdigest() == self._fp_password:
+        if self.__username == self.__fp__username and getattr(hashlib, self.__algo)(
+                self.__password.encode('utf-8')).hexdigest() == self._fp_password:
             return True
         return False
