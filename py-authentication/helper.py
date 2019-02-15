@@ -5,8 +5,10 @@ __email__ = 'barathcjb@gmail.com'
 
 import string
 import hashlib
+import os
 import random
 import constants
+import pyminizip
 
 __all__ = ['Username', 'Password']
 
@@ -96,10 +98,25 @@ class Validator:
         self.__fp_username = credents['username']
         self.__fp_password = credents['password']
         self.__fp_algo = credents['algovalue']
-        
+
     @property
     def validation(self):
         if self.__username == self.__fp_username and getattr(hashlib, self.__algo)(
                 self.__password.encode('utf-8')).hexdigest() == self.__fp_password:
             return True
         return False
+
+
+class secureData:
+    def __init__(self, file_location, password):
+        self.__auth_file = file_location
+        self.__password = password
+        self.__zip_path = self.__auth_file + ".zip"
+
+    def _compress(self):
+        data = pyminizip.compress(
+            self.__auth_file, None, self.__auth_file+".zip", self.__password, 5)
+
+    def _decompress(self):
+        data = pyminizip.uncompress(
+            self.__zip_path, self.__password, os.path.abspath(os.path.dirname(self.__auth_file)), 0)

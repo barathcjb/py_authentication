@@ -4,7 +4,7 @@ __author__ = 'Barathwaj C'
 __email__ = 'barathcjb@gmail.com'
 
 import os
-import pickle
+import marshal
 
 import constants
 import helper
@@ -19,7 +19,7 @@ class Client:
         self.__attribute = []
 
         if os.path.isdir(auth_file_location):
-            self.__file_location = auth_file_location
+            self.__file_location = auth_file_location + "authDB"
         else:
             raise Exception("invalid file location")
 
@@ -49,11 +49,9 @@ class Client:
 
     def __openConnection(self, mode):
         if mode == 'w':
-            self.__connection = open(os.path.join(
-                self.__file_location, 'authDb'), 'ab')
+            self.__connection = open(self.__file_location, 'ab+')
         if mode == 'r':
-            self.__connection = open(os.path.join(
-                self.__file_location, 'authDb'), 'rb')
+            self.__connection = open(self.__file_location, 'rb+')
 
     def __closeConnection(self):
         self.__connection.close()
@@ -74,28 +72,27 @@ class Client:
 
     def logCredents(self):
         self.__openConnection(mode='w')
-        self.__cursor = pickle.Pickler(self.__connection)
-        self.__cursor.dump(self.__mergeDicts)
-
+        marshal.dump(self.__mergeDicts, self.__connection, 2)
         self.__closeConnection()
 
     def viewAuthDb(self):
         self.__openConnection(mode='r')
-        self.__loader = pickle.Unpickler(self.__connection)
         while True:
             try:
-                print(self.__loader.load())
+                self.__loaded = marshal.load(self.__connection)
+                print(self.__loaded)
             except EOFError:
                 break
         self.__closeConnection()
 
     def validate(self, username, password, algo='md5'):
         self.__openConnection(mode='r')
-        self.__loader = pickle.Unpickler(self.__connection)
+        # self.__loader = pickle.Unpickler(self.__connection)
         __validation = False
         while True:
             try:
-                _credents = self.__loader.load()
+                self.__loaded = marshal.load(self.__connection)
+                _credents = self.__loaded
                 __validator = helper.Validator(
                     username, password, algo, _credents)
                 if __validator.validation:
@@ -105,3 +102,8 @@ class Client:
                 return False
                 break
         self.__closeConnection()
+
+    def secureAuthData(self, dest_file_location, password):
+        self.__connection.close()
+        self.__security = helper.secureData(dest_file_location, password)
+        self.__security._compress()
