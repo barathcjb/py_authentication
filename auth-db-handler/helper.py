@@ -93,13 +93,13 @@ class Validator:
         self.__username = username
         self.__password = password
         self.__algo = algo
-        self.__fp__username = credents['username']
+        self.__fp_username = credents['username']
         self.__fp_password = credents['password']
         self.__fp_algo = credents['algovalue']
-
+        
     @property
     def validation(self):
-        if self.__username == self.__fp__username and getattr(hashlib, self.__algo)(
+        if self.__username == self.__fp_username and getattr(hashlib, self.__algo)(
                 self.__password.encode('utf-8')).hexdigest() == self.__fp_password:
             return True
         return False

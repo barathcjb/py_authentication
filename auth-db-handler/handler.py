@@ -16,7 +16,7 @@ class Client:
     def __init__(self, auth_file_location):
         self.__hashAlgo = None  # type: str
         self.__hash_value = None  # type:int
-        self._remarks = ''
+        self.__attribute = []
 
         if os.path.isdir(auth_file_location):
             self.__file_location = auth_file_location
@@ -35,6 +35,17 @@ class Client:
                 break
 
         return self.__hash_value
+
+    @property
+    def __mergeDicts(self):
+        userdata = {"username": self.__username_obj.username,
+                    "password": self.__password_obj._hash_password,
+                    "algovalue": self.__hash_algo_value}
+        if self.__attribute.__len__() != 0:
+            temp_data = userdata.copy()
+            temp_data.update(dict(self.__attribute))
+            return temp_data
+        return userdata
 
     def __openConnection(self, mode):
         if mode == 'w':
@@ -58,16 +69,14 @@ class Client:
                                               hashAlgo=hashAlgo, uppercase=uppercase, specialchars=specialchars,
                                               numbers=numbers, ignore=ignore)
 
-    def addRemarks(self, remarks):
-        self._remarks = remarks
+    def addAttribute(self, attribute, value):
+        self.__attribute.append((attribute, value))
 
     def logCredents(self):
         self.__openConnection(mode='w')
         self.__cursor = pickle.Pickler(self.__connection)
-        self.__cursor.dump({"username": self.__username_obj.username,
-                            "password": self.__password_obj._hash_password,
-                            "remarks": self._remarks,
-                            "algovalue": self.__hash_algo_value})
+        self.__cursor.dump(self.__mergeDicts)
+
         self.__closeConnection()
 
     def viewAuthDb(self):
@@ -96,13 +105,3 @@ class Client:
                 return False
                 break
         self.__closeConnection()
-
-
-if __name__ == "__main__":
-    c = Client(auth_file_location=os.path.dirname(__file__))
-    c.addUsername(username="Barathwaj02", hash_it=False)
-    c.addPassword(password='Sholmes02-', hashAlgo='sha512')
-    c.addRemarks(remarks="hello world")
-    c.logCredents()
-    c.viewAuthDb()
-    print(c.validate(username="Barathwaj02", password="Sholmes02-"))
