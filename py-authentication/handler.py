@@ -9,23 +9,38 @@ import marshal
 import constants
 import helper
 
-__all__ = ['Client', 'Username', 'Password']
+__all__ = ['Client']
 
 
 class Client:
+    """
+    Client API class to create functional userdata handling and manipulation  
+    by creating a light weight, portable authentication file.
+    secure the data by zip archiving it with/without a password for the 
+    archive.
+
+    Params:
+     auth_file_location: path where the authentication file should be placed
+    """
+
     def __init__(self, auth_file_location):
         self.__hashAlgo = None  # type: str
         self.__hash_value = None  # type:int
         self.__attribute = []
 
         if os.path.isdir(auth_file_location):
-            self.__file_location = auth_file_location + "authDB"
+            self.__file_location = os.path.abspath(auth_file_location) + "/authDB"
+
         else:
             raise Exception("invalid file location")
 
         self.__connection = None
         self.__cursor = None
         self.__loader = None
+
+    @property
+    def _hashAlgo(self):
+        return self.__hashAlgo
 
     @property
     def __hash_algo_value(self):
@@ -54,28 +69,67 @@ class Client:
             self.__connection = open(self.__file_location, 'rb+')
 
     def __closeConnection(self):
-        self.__connection.close()
+        try:
+            self.__connection.close()
+        except:
+            pass
 
     def addUsername(self, username, hash_it=False, hash_algo='md5'):
+        """
+        create a username.
+
+        Params:
+         username: string of the desired username
+         hash_it: boolean to specify if username should be hashed.(False by default)
+         hash_algo: specify the hashing algorithm to hash the username.(md5 default)
+        """
         self.__username_obj = helper.Username(hash_it)
         self.__username_obj.set_username(username=username)
 
-    def addPassword(self, password='', length=(0, 32), separator='_',
-                    hashAlgo='md5', uppercase=True, specialchars=True, numbers=True, ignore=''):
+    def addPassword(self, password='', length=(0, 32), hashAlgo='md5',
+                    uppercase=True, specialchars=True, numbers=True, ignore=''):
+        """
+        create a password with various configureation to it.
+
+        Params:
+         password: password string that must be stored
+         length: tuple containing minimum and maximum length of password string
+         hashAlgo: hashing algorithm to be used (md5 by default)
+         uppercase: boolean to specify if password can have uppercase characters
+         specialchars: boolean to specify if password can have speical characters
+         number: boolean to specify if password can have numbers
+         ignore: comma separated string to specify characters to ignore in password
+        """
+
         self.__hashAlgo = hashAlgo
-        self.__password_obj = helper.Password(password=password, length=length, separator=separator,
+        self.__password_obj = helper.Password(password=password, length=length, separator='_',
                                               hashAlgo=hashAlgo, uppercase=uppercase, specialchars=specialchars,
                                               numbers=numbers, ignore=ignore)
 
     def addAttribute(self, attribute, value):
+        """
+        add a new attribute to the particular userdata.
+        call the function the number of times the number of attributes to be
+        registered.
+
+        Params:
+         attribute: name of the attribute
+         value: value of the attribute
+        """
         self.__attribute.append((attribute, value))
 
     def logCredents(self):
+        """
+        store the configured userdata into the authentication file
+        """
         self.__openConnection(mode='w')
         marshal.dump(self.__mergeDicts, self.__connection, 2)
         self.__closeConnection()
 
-    def viewAuthDb(self):
+    def viewAuthFile(self):
+        """
+        view the contents of the authentication file
+        """
         self.__openConnection(mode='r')
         while True:
             try:
@@ -86,6 +140,15 @@ class Client:
         self.__closeConnection()
 
     def validate(self, username, password, algo='md5'):
+        """
+        validate a username and password with the authentication
+        file. default hash algorithm if not mentioned by the user is md5.
+
+        Params:
+         username: username
+         password: password
+         algo: hash algorithm to be used if specified while creating userdata(md5 default)
+        """
         self.__openConnection(mode='r')
         # self.__loader = pickle.Unpickler(self.__connection)
         __validation = False
@@ -104,6 +167,27 @@ class Client:
         self.__closeConnection()
 
     def secureAuthData(self, dest_file_location, password):
-        self.__connection.close()
+        """
+        archive authentication file as a zip file with password protection
+        for shipping.
+
+        Params:
+         dest_file_location: destination path for archive file
+         password = password for the archive file
+        """
+        self.__closeConnection()
         self.__security = helper.secureData(dest_file_location, password)
         self.__security._compress()
+
+    def unArchiveAuthData(self, dest_file_location, password):
+        """
+        unarchive authentication file from a zip file with password protection
+        for local usage.
+
+        Params:
+         dest_file_location: destination path of archive file
+         password = password of the archive file
+        """
+        self.__closeConnection()
+        self.__security = helper.secureData(dest_file_location, password)
+        self.__security._decompress()

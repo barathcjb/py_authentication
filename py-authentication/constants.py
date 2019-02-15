@@ -3,7 +3,7 @@
 __author__ = 'Barathwaj C'
 __email__ = 'barathcjb@gmail.com'
 
-# supported algos
+
 class MD4:
     def __init__(self):
         self.name = 'MD4'
@@ -46,4 +46,5 @@ class SHA512:
         self.value = 6
 
 
+# supported algorith class
 algos = [MD4(), MD5(), SHA1(), SHA224(), SHA256(), SHA384(), SHA512()]

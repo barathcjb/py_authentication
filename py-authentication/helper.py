@@ -10,8 +10,6 @@ import random
 import constants
 import pyminizip
 
-__all__ = ['Username', 'Password']
-
 
 class Username:
     def __init__(self, hash_it, hashAlgo='md5'):
@@ -109,7 +107,7 @@ class Validator:
 
 class secureData:
     def __init__(self, file_location, password):
-        self.__auth_file = file_location
+        self.__auth_file = os.path.abspath(file_location)+"/authDB"
         self.__password = password
         self.__zip_path = self.__auth_file + ".zip"
 
