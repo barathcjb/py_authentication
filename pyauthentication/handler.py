@@ -14,9 +14,9 @@ __all__ = ['Client']
 
 class Client:
     """
-    Client API class to create functional userdata handling and manipulation  
+    Client API class to create functional userdata handling and manipulation
     by creating a light weight, portable authentication file.
-    secure the data by zip archiving it with/without a password for the 
+    secure the data by zip archiving it with/without a password for the
     archive.
 
     Params:
@@ -27,16 +27,17 @@ class Client:
         self.__hashAlgo = None  # type: str
         self.__hash_value = None  # type:int
         self.__attribute = []
+        self.__header = None  # type:str
 
         if os.path.isdir(auth_file_location):
-            self.__file_location = os.path.abspath(auth_file_location) + "/authDB"
+            self.__file_location = os.path.abspath(
+                auth_file_location) + "/authDB"
 
         else:
             raise Exception("invalid file location")
 
         self.__connection = None
-        self.__cursor = None
-        self.__loader = None
+        self.__loaded = None
 
     @property
     def _hashAlgo(self):
@@ -53,7 +54,8 @@ class Client:
 
     @property
     def __mergeDicts(self):
-        userdata = {"username": self.__username_obj.username,
+        userdata = {"header": self.__header,
+                    "username": self.__username_obj.username,
                     "password": self.__password_obj._hash_password,
                     "algovalue": self.__hash_algo_value}
         if self.__attribute.__len__() != 0:
@@ -73,6 +75,58 @@ class Client:
             self.__connection.close()
         except:
             pass
+
+    def updateField(self, header, username, password,  attribute, value, hash_algo='md5'):
+        """
+        update the authentication file with specific configurations.
+
+        Params:
+         header: header is like table in sql
+         username: username of the record
+         password: password of the record
+         hash_algo: if the administrator has used different algorithm for hashing
+         value: new value to be updated in the attribute
+        """
+        self.__openConnection(mode='r')
+        while True:
+            try:
+                self.__loaded = marshal.load(self.__connection)
+                self.__connection.seek(0)
+                __credents = self.__loaded
+                __updater = helper.Updater(header=header,
+                                           username=username,
+                                           password=password,
+                                           hash_algo=hash_algo,
+                                           attribute=attribute,
+                                           value=value,
+                                           credents=__credents)
+                if __updater.updateValue:
+                    new_attribute, old_userdata = __updater.updateValue
+                    self.addPassword(password=password, hashAlgo=hash_algo)
+                    new_userdata = {"header": header,
+                                    "username": username,
+                                    "password": self.__password_obj._hash_password,
+                                    "algovalue": hash_algo}
+                    temp_data = new_userdata.copy()
+                    temp_data.update(new_attribute)
+                    self.__openConnection(mode='w')
+                    marshal.dump(temp_data, self.__connection, 2)
+                    self.__closeConnection()
+                    break
+            except EOFError:
+                return False
+                break
+
+        self.__closeConnection()
+
+    def addHeader(self, header):
+        """
+        add header to the userdata
+
+        Params:
+         header: header is like table in sql. Add header to segregate data.
+        """
+        self.__header = header
 
     def addUsername(self, username, hash_it=False, hash_algo='md5'):
         """
@@ -122,6 +176,8 @@ class Client:
         """
         store the configured userdata into the authentication file
         """
+        # if self.__header == None:
+        #     raise Exception('header of the userdata cannot be None')
         self.__openConnection(mode='w')
         marshal.dump(self.__mergeDicts, self.__connection, 2)
         self.__closeConnection()
@@ -139,7 +195,7 @@ class Client:
                 break
         self.__closeConnection()
 
-    def validate(self, username, password, algo='md5'):
+    def validate(self, header, username, password, algo='md5'):
         """
         validate a username and password with the authentication
         file. default hash algorithm if not mentioned by the user is md5.
@@ -150,20 +206,22 @@ class Client:
          algo: hash algorithm to be used if specified while creating userdata(md5 default)
         """
         self.__openConnection(mode='r')
-        # self.__loader = pickle.Unpickler(self.__connection)
-        __validation = False
         while True:
             try:
                 self.__loaded = marshal.load(self.__connection)
-                _credents = self.__loaded
-                __validator = helper.Validator(
-                    username, password, algo, _credents)
+                __credents = self.__loaded
+                __validator = helper.Validator(header=header,
+                                               username=username,
+                                               password=password,
+                                               algo=algo,
+                                               credents=__credents)
                 if __validator.validation:
                     return True
                     break
             except EOFError:
                 return False
                 break
+
         self.__closeConnection()
 
     def secureAuthData(self, dest_file_location, password):

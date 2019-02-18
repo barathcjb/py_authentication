@@ -89,20 +89,41 @@ class Password:
 
 
 class Validator:
-    def __init__(self, username, password, algo, credents):
+    def __init__(self, header, username, password, algo, credents):
+        self.__header = header
         self.__username = username
         self.__password = password
         self.__algo = algo
+        self.__fp_header = credents['header']
         self.__fp_username = credents['username']
         self.__fp_password = credents['password']
         self.__fp_algo = credents['algovalue']
 
     @property
     def validation(self):
-        if self.__username == self.__fp_username and getattr(hashlib, self.__algo)(
+        if self.__header == self.__fp_header and self.__username == self.__fp_username and getattr(hashlib, self.__algo)(
                 self.__password.encode('utf-8')).hexdigest() == self.__fp_password:
             return True
         return False
+
+
+class Updater:
+    def __init__(self, header, username, password, hash_algo, attribute, value, credents):
+        self.__attribute = attribute
+        self.__value = value
+        self.__credents = credents
+        self.__validator = Validator(
+            header, username, password, hash_algo, credents)
+
+        if attribute not in credents.keys():
+            raise AttributeError('mentioned attribute not present')
+        if attribute == 'password':
+            raise Exception('passwords cannot be changed')
+
+    @property
+    def updateValue(self):
+        if self.__validator.validation:
+            return {self.__attribute: self.__value}, self.__credents
 
 
 class secureData:
