@@ -9,9 +9,9 @@ from pyauthentication.handler import Client
 
 obj = Client(auth_file_location='.')
 obj.addUsername(username="Barathwaj")
-obj.addPassword(password="Sholmes02-", length=(0, 16), hashAlgo="sha512")
+obj.addPassword(password="123", length=(0, 16), hashAlgo="sha512")
 obj.addAttribute(attribute="age", value=22)
 obj.logCredents()
 obj.viewAuthFile()
-print(obj.validate(username="Barathwaj", password="Sholmes02-", algo='sha512'))
+print(obj.validate(username="Barathwaj", password="123-", algo='sha512'))
 obj.unArchiveAuthData(dest_file_location='.', password='123')
