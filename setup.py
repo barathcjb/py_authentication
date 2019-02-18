@@ -1,14 +1,12 @@
-"""
-Setup file.
-"""
+#!usr/bin/env python3
+
+__author__ = 'Barathwaj C'
+__email__ = 'barathcjb@gmail.com'
+
 try:
-    from distutils.core import setup
+    from setuptools import setup
 except:
     print('setuptools not found \n install python setup tools')
-
-with open("README.md", "r") as readme:
-    LONG_DESCRIPTION = readme.read()
-
 
 AUTHOR = 'Barathwaj C'
 AUTHOR_EMAIL = 'barathcjb@gmail.com'
@@ -31,19 +29,20 @@ INSTALL_REQUIRES = [
     'pyminizip'
 ]
 
-REQUIRES = ['os','hashlib','sys','marshal']
+REQUIRES = ['os', 'hashlib', 'sys', 'marshal']
 setup(name=PACKAGE_NAME,
       version=VERSION,
       description=DESCRIPTION,
-      long_description=LONG_DESCRIPTION,
-      long_description_content_type="text/markdown",
       url=URL,
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
       install_requires=INSTALL_REQUIRES,
       packages=['pyauthentication'],
       license=LICENSE,
-      scripts=['pyauthentication/handler.py'],
+      scripts=['pyauthentication/__init__.py',
+      'pyauthentication/handler.py',
+      'pyauthentication/constants.py',
+      'pyauthentication/helper.py'],
       requires=REQUIRES,
       include_package_data=True,
       zip_safe=False,
