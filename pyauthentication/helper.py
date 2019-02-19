@@ -95,9 +95,9 @@ class Validator:
         self.__password = password
         self.__algo = algo
         self.__fp_header = credents['header']
-        self.__fp_username = credents['username']
-        self.__fp_password = credents['password']
-        self.__fp_algo = credents['algovalue']
+        self.__fp_username = credents['credents']['username']
+        self.__fp_password = credents['credents']['password']
+        self.__fp_algo = credents['credents']['algovalue']
 
     @property
     def validation(self):

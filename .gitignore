@@ -107,4 +107,3 @@ venv.bak/
 .vscode
 .vscode/settings.json
 auth-db-handler/authDb
-pyauthentication/test.py

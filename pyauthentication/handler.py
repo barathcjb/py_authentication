@@ -55,9 +55,11 @@ class Client:
     @property
     def __mergeDicts(self):
         userdata = {"header": self.__header,
-                    "username": self.__username_obj.username,
-                    "password": self.__password_obj._hash_password,
-                    "algovalue": self.__hash_algo_value}
+                    "credents": {
+                        "username": self.__username_obj.username,
+                        "password": self.__password_obj._hash_password,
+                        "algovalue": self.__hash_algo_value}
+                    }
         if self.__attribute.__len__() != 0:
             temp_data = userdata.copy()
             temp_data.update(dict(self.__attribute))
@@ -104,9 +106,11 @@ class Client:
                     new_attribute, old_userdata = __updater.updateValue
                     self.addPassword(password=password, hashAlgo=hash_algo)
                     new_userdata = {"header": header,
-                                    "username": username,
-                                    "password": self.__password_obj._hash_password,
-                                    "algovalue": hash_algo}
+                                    "credents": {
+                                        "username": username,
+                                        "password": self.__password_obj._hash_password,
+                                        "algovalue": hash_algo}
+                                    }
                     temp_data = new_userdata.copy()
                     temp_data.update(new_attribute)
                     self.__openConnection(mode='w')
