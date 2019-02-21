@@ -31,10 +31,8 @@ class Username:
 
 
 class Password:
-    def __init__(self, password='', length=(0, 32), separator='_',
+    def __init__(self, password='', separator='_',
                  hashAlgo='md5', uppercase=False, specialchars=True, numbers=True, ignore=''):
-        self.__minimum_chars = length[0]
-        self.__maximum_chars = length[1]
         self.__separator = separator
         self.__special_chars = specialchars
         self.__hash = hashAlgo
@@ -74,13 +72,6 @@ class Password:
             for ignore_key in __chars:
                 if ignore_key in self.__ignore_list:
                     __chars.replace(ignore_key, '')
-
-            __chars = '{message:{fill}{align}{width}}'.format(
-                message=__chars,
-                fill='0',
-                align='>',
-                width=self.__maximum_chars,
-            )
 
             return ''.join([random.choice(__chars)for i in range(
                 self.__minimum_chars, self.__maximum_chars)])

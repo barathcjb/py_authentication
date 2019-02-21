@@ -144,7 +144,7 @@ class Client:
         self.__username_obj = helper.Username(hash_it)
         self.__username_obj.set_username(username=username)
 
-    def addPassword(self, password='', length=(0, 32), hashAlgo='md5',
+    def addPassword(self, password='', hashAlgo='md5',
                     uppercase=True, specialchars=True, numbers=True, ignore=''):
         """
         create a password with various configureation to it.
@@ -160,7 +160,7 @@ class Client:
         """
 
         self.__hashAlgo = hashAlgo
-        self.__password_obj = helper.Password(password=password, length=length, separator='_',
+        self.__password_obj = helper.Password(password=password, separator='_',
                                               hashAlgo=hashAlgo, uppercase=uppercase, specialchars=specialchars,
                                               numbers=numbers, ignore=ignore)
 
